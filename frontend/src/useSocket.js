@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const WEBSOCKET_URL = 'ws://localhost:5000'
-const MAX_DATA_POINTS = 30 // The maximum number of data points to show
+const MAX_DATA_POINTS = 30 // maximum number of data points to show
 
 function useSocket() {
 	const [dataHistory, setDataHistory] = useState([])
