@@ -3,26 +3,14 @@ import paho.mqtt.client as mqtt
 import config, time
 
 
-servo_pwm = GPIO.PWM(config.SERVO, 50) # 50hz: frequency for servo
-servo_pwm.start(0)
 fan_pwm = GPIO.PWM(config.ENA, 1000)
 fan_pwm.start(0)
-
-
-def set_angle(angle):
-    cycle = angle / 18 + 2
-    servo_pwm.ChangeDutyCycle(cycle)
-    time.sleep(1)
-    servo_pwm.ChangeDutyCycle(0) # stop sending signal
-    
-set_angle(0) # close at startup
 
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker")
         client.subscribe(config.LED_CONTROL)
-        client.subscribe(config.SERVO_CONTROL)
         client.subscribe(config.FAN)
         print("Subscribed to all channels.")
     else:
@@ -38,12 +26,6 @@ def on_message(client, userdata, msg):
             GPIO.output(config.LED, GPIO.HIGH)
         elif payload == "OFF":
             GPIO.output(config.LED, GPIO.LOW)
-            
-    elif msg.topic == config.SERVO_CONTROL:
-        if payload == "OPEN":
-            set_angle(180)
-        elif payload == "CLOSE":
-            set_angle(0)
             
     elif msg.topic == config.FAN:
         if payload == "ON":

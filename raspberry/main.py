@@ -7,7 +7,6 @@ import config
 print("BEGIN")
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(config.LED, GPIO.OUT)
-GPIO.setup(config.SERVO, GPIO.OUT)
 GPIO.setup(config.ENA, GPIO.OUT)
 GPIO.setup(config.IN1, GPIO.OUT)
 GPIO.setup(config.IN2, GPIO.OUT)
