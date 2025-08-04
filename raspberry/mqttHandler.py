@@ -21,8 +21,8 @@ set_angle(0) # close at startup
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker")
-        client.subscribe(config.LED)
-        client.subscribe(config.SERVO)
+        client.subscribe(config.LED_CONTROL)
+        client.subscribe(config.SERVO_CONTROL)
         print("Subscribed to all channels.")
     else:
         print("Failed. {rc}")
@@ -30,13 +30,13 @@ def on_connect(client, userdata, flags, rc):
     
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
-    if msg.topic == config.LED:
+    if msg.topic == config.LED_CONTROL:
         if payload == "ON":
             GPIO.output(config.LED, GPIO.HIGH)
         elif payload == "OFF":
             GPIO.output(config.LED, GPIO.LOW)
             
-    elif msg.topic == config.SERVO:
+    elif msg.topic == config.SERVO_CONTROL:
         if payload == "OPEN":
             set_angle(180)
         elif payload == "CLOSE":
