@@ -18,7 +18,7 @@ def publish_data(client):
                     "timestamp": int(time.time() * 1000) # millisecond
                     }
                 payload = json.dumps(data)
-                client.publish(config.DHT, payload, qos=0)
+                client.publish(config.DHT_DATA, payload, qos=0)
                 
         except RuntimeError as e:
             print(e.args[0])
