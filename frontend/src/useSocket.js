@@ -1,23 +1,30 @@
-import { useState, useEffect } from 'react'
-
-const WEBSOCKET_URL = 'ws://localhost:5000'
-const MAX_DATA_POINTS = 30 // maximum number of data points to show
+import { useState, useEffect, useRef } from 'react'
+import mqtt from 'mqtt'
+import { WEBSOCKET_URL, DH11_DATA, CONNECT_OPTIONS, MAX_DATA_POINTS } from './config'
 
 function useSocket() {
 	const [dataHistory, setDataHistory] = useState([])
 	const [isConnected, setIsConnected] = useState(false)
+	const clientRef = useRef(null)
 
 	useEffect(() => {
-		const ws = new WebSocket(WEBSOCKET_URL)
+		if (clientRef.current) return; // Prevent multiple connections
+		clientRef.current = mqtt.connect(WEBSOCKET_URL, CONNECT_OPTIONS)
+		const client = clientRef.current;
 
-		ws.onopen = () => {
+		client.on('connect', () => {
 			setIsConnected(true)
-		}
+			client.subscribe(DH11_DATA, { qos: 0 }, (e) => {
+				if (e) {
+					// console.error('error:', e)
+				}
+			})
+		})
 
-		ws.onmessage = (event) => {
-			try {
-				const newDataPoint = JSON.parse(event.data)
-
+		client.on('message', (topic, message) => {
+			if (topic === DH11_DATA) {
+				try {
+					const newDataPoint = JSON.parse(message.toString())
 				// add new data point
 				setDataHistory((currentHistory) => {
 					const updatedHistory = [...currentHistory, newDataPoint]
@@ -28,26 +35,51 @@ function useSocket() {
 					}
 					return updatedHistory
 				})
-			} catch (error) {
-				console.error('Error parsing WebSocket message:', error)
+				} catch (error) {
+					console.error('Error:', error)
+				}
 			}
-		}
+		})
 
-		ws.onclose = () => {
+		client.on('close', () => {
 			setIsConnected(false)
-		}
+		})
 
-		ws.onerror = (error) => {
-			console.error('WebSocket error:', error)
+		client.on('error', (error) => {
+			console.error('MQTT error:', error)
 			setIsConnected(false)
-		}
+			client.end()
+		})
 
 		return () => {
-			ws.close()
+			if (client) {
+				client.end()
+			}
 		}
 	}, [])
 
-	return { dataHistory, isConnected }
+	function ledControl(topic, payload) {
+		if (clientRef.current && clientRef.current.connected) {
+			clientRef.current.publish(topic, payload, { qos: 0 }, (e) => {
+				if (e) {
+					// console.error('error:', e)
+				}
+			})
+		}
+	}
+
+	function fanControl(topic, payload) {
+		if (clientRef.current && clientRef.current.connected) {
+			clientRef.current.publish(topic, payload, { qos: 0 }, (e) => {
+				if (e) {
+					// console.error('error:', e)
+				}
+				console.log(`Fan control message sent: ${payload}`)
+			})
+		}
+	}
+
+	return { dataHistory, isConnected, ledControl, fanControl }
 }
 
 export default useSocket
