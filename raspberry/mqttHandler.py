@@ -23,6 +23,7 @@ def on_connect(client, userdata, flags, rc):
         print("Connected to MQTT Broker")
         client.subscribe(config.LED_CONTROL)
         client.subscribe(config.SERVO_CONTROL)
+        client.subscribe(config.FAN)
         print("Subscribed to all channels.")
     else:
         print("Failed. {rc}")
@@ -30,6 +31,8 @@ def on_connect(client, userdata, flags, rc):
     
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
+    # print(payload)
+    
     if msg.topic == config.LED_CONTROL:
         if payload == "ON":
             GPIO.output(config.LED, GPIO.HIGH)
