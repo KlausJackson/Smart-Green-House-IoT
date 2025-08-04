@@ -11,9 +11,9 @@ fan_pwm.start(0)
 
 def set_angle(angle):
     cycle = angle / 18 + 2
-    pwm.ChangeDutyCycle(cycle)
+    servo_pwm.ChangeDutyCycle(cycle)
     time.sleep(1)
-    pwm.ChangeDutyCycle(0) # stop sending signal
+    servo_pwm.ChangeDutyCycle(0) # stop sending signal
     
 set_angle(0) # close at startup
 
